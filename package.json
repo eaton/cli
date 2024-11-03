@@ -21,8 +21,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "pkgroll",
-    "clean": "shx rm -rf dist",
+    "build": "pkgroll --minify",
+    "clean": "shx rm -rf dist;shx rm -rf .tsimp",
     "prepare": "npm run clean && npm run build",
     "test": "ava"
   },
@@ -41,11 +41,23 @@
   "author": "eaton",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.30",
-    "ava": "^6.1.2",
-    "pkgroll": "^2.0.2",
+    "@types/node": "^22.8.6",
+    "ava": "^6.2.0",
+    "pkgroll": "^2.5.1",
     "shx": "^0.3.4",
-    "tsimp": "^2.0.11",
-    "typescript": "^5.4.3"
+    "tsimp": "^2.0.12",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "ansi-escapes": "^7.0.0",
+    "clipboardy": "^4.0.0",
+    "conf": "^13.0.1",
+    "exit-hook": "^4.0.0",
+    "log-update": "^6.1.0",
+    "open": "^10.1.0",
+    "restore-cursor": "^5.1.0",
+    "tasuku": "^2.0.1",
+    "terminal-size": "^4.0.0",
+    "yoctocolors": "^2.1.1"
   }
 }
