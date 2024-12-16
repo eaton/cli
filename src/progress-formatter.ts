@@ -1,23 +1,28 @@
 /**
  * Preconfigured bar styles for the Progress bar.
- * 
+ *
  * Each style is an array of single-character strings; the first is
  * the 'empty' character used to fill incomplete portions of the
  * progress bar and the last is the 'full' character used to fill
  * completed portions of the bar. Any other characters in between
  * are treated as a scale of 'partially full' values.
- * 
+ *
  * Technically, these values need not be single characters; ANSI
  * color codes can be used, for example, but anything that actually
  * takes up more than one column in the terminal will likely mess
  * up the spacing.
  */
 export const ProgressStyles = {
-  fractional: [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'],
+  ascii: ['-', '#'],
+  bullets: ['◌', '●'],
+  dots: [' ', '⡀', '⡄', '⡆', '⡇', '⣇', '⣧', '⣷', '⣿'],
+  dotline: ['⠒', '⠖', '⠗', '⠷', '⠿'],
+  hfill: [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'],
+  line: ['┈', '━'],
+  grow: ['', '█'],
   shaded: [' ', '░', '▒', '▓', '█'],
   simple: ['░', '█'],
-  ascii: ['-', '#'],
-  grow: ['', '█'],
+  vfill: [' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'],
 };
 
 /**
@@ -104,6 +109,14 @@ export class Progress {
     }
   }
 
+  reset() {
+    this._failed = 0;
+    this._finished = 0;
+    this._started = 0;
+    this._succeeded = 0;
+    this._total = 0;
+  }
+
   get [Symbol.toStringTag]() {
     return 'Progress';
   }
@@ -134,14 +147,14 @@ export class Progress {
   }
   set completed(input: number) {
     this._succeeded = input - this._failed;
-    if (this.autostop && (this.completed >= this.total)) {
+    if (this.autostop && this.completed >= this.total) {
       this.stop();
     }
   }
 
   get percentCompleted(): number {
-    if (this._total <= 0) return 0;
-    return Math.max(Math.min(this.completed / this.total, 1), 0)
+    if (this.total <= 0) return 0;
+    return this.completed / this.total;
   }
 
   get elapsedTime(): number {

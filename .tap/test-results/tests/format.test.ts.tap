@@ -1,0 +1,17 @@
+TAP version 14
+# Subtest: console output
+    ok 1 - should be equal
+{
+  "status": "running",
+  "target": 100,
+  "value": 63,
+  "progress": 63,
+  "elapsed": 1,
+  "estimated": 2,
+  "message": "Test message",
+  "output": "almost 55 years"
+}
+    1..1
+ok 1 - console output # time=2.353ms
+
+1..1

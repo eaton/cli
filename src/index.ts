@@ -1,1 +1,1 @@
-export * from './progress.js';
+export * from './progress-formatter.js';

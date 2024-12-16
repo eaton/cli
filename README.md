@@ -1,4 +1,4 @@
-# Eaton's CLI Tools
+# EatonFYI CLI Tools
 
 A slowly evolving bundle of CLI helper tools that I use in various projects.
 
