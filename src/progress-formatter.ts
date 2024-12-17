@@ -1,31 +1,4 @@
 /**
- * Preconfigured bar styles for the Progress bar.
- *
- * Each style is an array of single-character strings; the first is
- * the 'empty' character used to fill incomplete portions of the
- * progress bar and the last is the 'full' character used to fill
- * completed portions of the bar. Any other characters in between
- * are treated as a scale of 'partially full' values.
- *
- * Technically, these values need not be single characters; ANSI
- * color codes can be used, for example, but anything that actually
- * takes up more than one column in the terminal will likely mess
- * up the spacing.
- */
-export const ProgressStyles = {
-  ascii: ['-', '#'],
-  bullets: ['◌', '●'],
-  dots: [' ', '⡀', '⡄', '⡆', '⡇', '⣇', '⣧', '⣷', '⣿'],
-  dotline: ['⠒', '⠖', '⠗', '⠷', '⠿'],
-  hfill: [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'],
-  line: ['┈', '━'],
-  grow: ['', '█'],
-  shaded: [' ', '░', '▒', '▓', '█'],
-  simple: ['░', '█'],
-  vfill: [' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'],
-};
-
-/**
  * Starting values for a Progress instance.
  */
 export type ProgressOptions = {
@@ -57,19 +30,6 @@ export type ProgressOptions = {
    */
   autostop: boolean;
 
-  /**
-   * The width of the progress bar, in characters. Defaults to 40.
-   */
-  width: number;
-
-  /**
-   * An array of string values used as segments to build an ASCII
-   * progress bar. The first array item is the 'empty' character, the
-   * last item is the 'full' character, and any other characters in
-   * between are used as a scale to represent fractional sub-character
-   * levels of completion.
-   */
-  style: string[];
 }
 
 const defaults: ProgressOptions = {
@@ -77,8 +37,6 @@ const defaults: ProgressOptions = {
   completed: 0,
   autostart: true,
   autostop: true,
-  width: 40,
-  style: ProgressStyles.simple,
 }
 
 export class Progress {
@@ -92,13 +50,8 @@ export class Progress {
 
   protected autostop: boolean;
 
-  width = 0;
-  style: string[];
-
   constructor(options: Partial<ProgressOptions> = {}) {
     const opt = { ...defaults, ...options };
-    this.width = opt.width;
-    this.style = opt.style;
 
     this.completed = opt.completed;
     this.total = opt.total;
@@ -187,35 +140,5 @@ export class Progress {
 
   stop() {
     this._finished ||= Date.now();
-  }
-
-  bar(width = this.width, style = this.style) {
-    if (style.length === 0) {
-      style.push('', '#');
-    } else if (style.length === 1) {
-      style.unshift('');
-    }
-
-    const full = style[style.length - 1];
-    const empty = style[0];
-
-    const totalFilledLength = width * this.percentCompleted; // Full length, including partial segment
-  
-    // Determine the integer and fractional parts of the filled length
-    const filledLength = Math.floor(totalFilledLength); // Complete segments
-    const partialIndex = Math.floor(
-      (totalFilledLength - filledLength) * style.length,
-    );
-  
-    // Create the filled, partial, and empty parts of the bar
-    const filledBar = full.repeat(filledLength);
-    const partialBar = partialIndex > 0 ? style[partialIndex] : ''; // Select a partial character if needed
-    const emptyBar = empty.repeat(width - filledLength - (partialBar ? 1 : 0));
-  
-    return `${filledBar}${partialBar}${emptyBar}`;
-  }
-
-  toString() {
-    return this.bar();
   }
 }
