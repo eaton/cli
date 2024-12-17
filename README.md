@@ -11,14 +11,14 @@ of other tools I've standardized on.
 
 The `sparkline()` and `dotline()` formatters take an array of numbers and spit out a rolling graph of the latest *n* values. This can be useful for tracking, say, throughput during a file transfer.
 
-```
+```ascii
 sparkline: ▂▆▂█▆▇▄▂▃▄▆▆▅█▄▅█▇▅█▃▁█▄▄▅█▅▃▇▅▁▃▆▆▇▂▄▆▅
 dotline:   ⣦⣷⣧⣠⣴⣶⣧⣾⣶⣧⣸⣤⣾⣦⣶⣠⣶⣇⣴⡆
 ```
 
 The `progressBar()` formatter takes a 'current value' and a 'max value' and builds a simple progress bar using arbitrary characters. It supports a number of additional styles, but the 'default' style is smart enough to use UTF8 box characters to use partially-filled boxes to achieve higher-resolution updates with large target values. It's neat.
 
-```
+```ascii
 default: █████████████▌
 simple:  ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░
 ascii:   ###############-------------------------
