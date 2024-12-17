@@ -1,12 +1,6 @@
-type Style = {
-  width: number
-  pad: string,
-  floor: number,
-  formatter?: (input: string) => string,
-  debug: boolean,
-};
+import type { SparklineStyle } from './sparkline.js';
 
-const defaultStyle: Style = {
+const defaultStyle: SparklineStyle = {
   width: 40,
   pad: '',
   floor: 1,
@@ -22,7 +16,7 @@ const dots: Record<string, string> = {
   '40': '⡇', '41': '⣇', '42': '⣧', '43': '⣷', '44': '⣿',
 };
 
-export function dotline(input: number[], options: Partial<Style> = {}) {
+export function dotline(input: number[], options: Partial<SparklineStyle> = {}) {
   const opt = { ...defaultStyle, ...options };
 
   const output = [...chunks(normalize(input, opt.floor, 4), 2)]

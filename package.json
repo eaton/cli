@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "build": "pkgroll",
-    "demo": "node --experimental-strip-types ./demo.mjs",
+    "demo:formatters": "node ./examples/formatters.mjs",
     "package": "pkgroll --clean-dist --minify",
     "test": "tap"
   },
