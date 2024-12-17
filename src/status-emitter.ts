@@ -15,7 +15,7 @@ export type StatusEvents<Data extends StatusData = StatusData> = {
   complete: Data;
 }
 
-export class StatusEmitter<Events extends StatusEvents = StatusEvents> extends Emittery<Events> {
+export class StatusEmitter<Events = StatusEvents> extends Emittery<Events> {
   // Nothing to see here, folks, patching around a type definition issue.
   override bindMethods(target: object, methodNames?: readonly string[]) {
     super.bindMethods(target as Record<string, unknown>, methodNames)

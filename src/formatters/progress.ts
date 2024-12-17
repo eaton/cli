@@ -10,6 +10,7 @@ export const ProgressStyles = {
   ascii: ['-', '#'],
   bullets: ['◌', '●'],
   debug: ['.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X'],
+  fractions: ['0', '⅛', '¼', '⅜', '½', '⅝', '¾', '⅞', '1'],
   dots: [' ', '⡀', '⡄', '⡆', '⡇', '⣇', '⣧', '⣷', '⣿'],
   dotline: ['⠒', '⠖', '⠗', '⠷', '⠿'],
   grow: ['', '█'],
@@ -27,11 +28,10 @@ const defaultStyle: Style = {
   debug: false,
 }
 
-export function progressBar(progress = 0, total = 100, options: Partial<Style> = {}) {
+export function progressBar(current = 0, max = 100, options: Partial<Style> = {}) {
   const opt = { ...defaultStyle, ...options };
-
-  if (opt.style.length === 0) {
-    opt.style.push('#');
+  if (opt.debug && !options.style) {
+    opt.style = ProgressStyles.debug;
   }
 
   if (opt.style.length === 0) {
@@ -43,7 +43,7 @@ export function progressBar(progress = 0, total = 100, options: Partial<Style> =
   const empty = opt.style[0];
   const full = opt.style[opt.style.length - 1];
 
-  const percentCompleted = progress/total;
+  const percentCompleted = current/(Math.max(current, max));
 
   const totalFilledLength = opt.width * percentCompleted; // Full length, including partial segment
 
@@ -56,11 +56,13 @@ export function progressBar(progress = 0, total = 100, options: Partial<Style> =
   // Create the filled, partial, and empty parts of the bar
   const filledBar = full.repeat(filledLength);
   const partialBar = partialIndex > 0 ? opt.style[partialIndex] : ''; // Select a partial character if needed
-  const emptyLength = opt.width - filledLength - partialBar.length;
+  const emptyLength = opt.width - filledLength - (partialBar ? 1 : 0);
   const emptyBar = emptyLength > 0 ? empty.repeat(emptyLength) : '';
 
   const output = `${filledBar}${partialBar}${emptyBar}`;
-  const debug = opt.debug ? ` (${opt.width}, ${output.length}, ${filledLength}, ${partialBar.length}, ${emptyLength})` : ''
+
+  // Debug stuff
+  const debug = opt.debug ? ` (${opt.width}, ${current}/${max}, ${output.length}, ${filledBar.length}, ${partialBar.length}, ${emptyLength})` : ''
 
   return output + debug;
 }

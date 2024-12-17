@@ -1,184 +1,131 @@
-import { StatusData } from "./status-emitter.js";
+/**
+ * Starting values for a Progress instance.
+ */
+export type TrackerOptions = {
+  /**
+   * The target total for progress calculations. This can be changed
+   * while an operation is still running.
+   */
+  total: number;
 
-export type Options = {
-  autoStart: boolean;
-  autoStop: boolean;
+  /**
+   * The number of already-completed operations.
+   */
+  completed: number;
+
+  /**
+   * A status message with additional information about the current task.
+   */
+  message?: string;
+
+  /**
+   * Start the progress tracker's elapsed time marker as soon
+   * as the object is created. If set to `false`, the `start()`
+   * method must be called for elapsed and estimated time
+   * calculations.
+   */
+  autostart: boolean;
+
+  /**
+   * If `true`, the progress tracker's internal elapsed time counter
+   * will stop as soon as the `completed` value meets or exceeds the
+   * `total` value.
+   * 
+   * If `false`, the `stop()` method must be called to end the timer.
+   */
+  autostop: boolean;
 }
 
-const defaults: Options = {
-  autoStart: false,
-  autoStop: true,
+const defaults: TrackerOptions = {
+  total: 0,
+  completed: 0,
+  autostart: true,
+  autostop: true,
 }
 
-export class StatusTracker<T extends StatusData = StatusData> {
-  private _data: Partial<T>;
-  private _options: Options;
+export class StatusTracker {
+  protected _total = 0;
+  protected _completed = 0;
 
-  private _started: number = 0;
-  private _finished: number = 0;
+  protected _started = 0;
+  protected _finished = 0;
 
-  private _status: 'ready' | 'running' | 'complete' = 'ready';
+  protected autostop: boolean;
 
-  constructor(data: Partial<T> = {}, options: Partial<Options> = {}) {
-    this._options = { ...defaults, ...options };
-    this._data = { target: 0, value: 0, ...data };
+  constructor(options: Partial<TrackerOptions> = {}) {
+    const opt = { ...defaults, ...options };
 
-    if (this._options.autoStart) {
+    this.completed = opt.completed;
+    this.total = opt.total;
+
+    this.autostop = opt.autostop;
+    if (opt.autostart) {
       this.start();
     }
-  };
-
-  /**
-   * Timestamp of the tracker's starting point, in ms
-   * 
-   * Note: Returns 0 if the tracker's status is 'ready'
-   */
-  get status() {
-    return this._status;
-  }
-  
-  /**
-   * Starts the tracker.
-   */
-  start() {
-    if (this._status === 'ready') {
-      this._started = Date.now();
-      this._status = 'running';
-    }
   }
 
-  /**
-   * Stops the tracker, freezing its progress and time estimates.
-   */
-  stop() {
-    if (this._status === 'running') {
-      this._finished = Date.now();
-      this._status = 'complete';
-    }
-  }
-
-  /**
-   * Resets the tracker, setting internal data values to 0 if none are provided.
-   */
-  reset(data: Partial<T> = {}) {
-    this._status = 'ready';
+  reset() {
+    this._finished = 0;
     this._started = 0;
-    this.update({ value: 0, target: 0, message: undefined, ...data }); 
+    this._completed = 0;
+    this._total = 0;
   }
 
-  /**
-   * Force-updates all tracked status values using a data object.
-   */
-  update(input: Partial<T>) {
-    this.start();
-    if (this._status === 'running') {
-      this._data = {
-        ...this._data,
-        ...input
-      };
-      if (this.target <= this.value && this._options.autoStop) {
-        this.stop();
-      }
+  get [Symbol.toStringTag]() {
+    return 'Progress';
+  }
+
+  get total(): number {
+    return this._total;
+  }
+  set total(input: number) {
+    this._total = input;
+  }
+
+  get completed(): number {
+    return this._completed;
+  }
+  set completed(input: number) {
+    this._completed = input;
+    if (this.autostop && this.completed >= this.total) {
+      this.stop();
     }
   }
 
-  /**
-   * Gets the current status message, if one exists.
-   */
-  get message() {
-    return this._data.message;
+  get percentCompleted(): number {
+    if (this.total <= 0) return 0;
+    return this.completed / this.total;
   }
 
-  /**
-   * Sets the current status message; setting to `undefined` will clear the message.
-   */
-  set message(input: string | undefined) {
-    this._data.message = input;
-  }
-
-  /**
-   * The current value; usually represents the number of records processed, bytes
-   * transferred, etc.
-   */
-  get value() {
-    return Math.max(this._data.value ?? 0, 0);
-  }
-  set value(input: number) {
-    this.start();
-    if (this._status === 'running') {
-      this._data.value = Math.max(input, 0);
-      this._data.target = Math.max(this.target, this.value);
-    }
-  }
-
-  /**
-   * The current target number
-   */
-  get target() {
-    return Math.max(this._data.target ?? 0, 0);
-  }
-  set target(input: number) {
-    this.start();
-    if (this._status === 'running') {
-      this._data.target = Math.max(input, this.value);
-    }
-  }
-
-  /**
-   * Completion percentage, from 0 to 100.
-   * 
-   * Note: Returns 0 if the tracker's status is 'ready'
-   */
-  get progress() {
-    if (this.target === 0) return 0;
-    return Math.min(100 * this.value / this.target, 100);
-  }
-
-  /**
-   * Timestamp of the tracker's starting point, in ms
-   * 
-   * Note: Returns 0 if the tracker's status is 'ready'
-   */
-  get started() {
-    return this._started;
-  }
-
-  /**
-   * Timestamp of the tracker's completion, in ms
-   * 
-   * Note: Returns 0 if the tracker's status is 'ready' or 'running'
-   */
-  get finished() {
-    return this._finished;
-  }
-
-  /**
-   * The elapsed time in ms
-   * 
-   * Note: Returns 0 if the tracker's status is 'ready'
-   */
-  get elapsed() {
-    if (this._status === 'running') {
-      return Date.now() - this._started;
-    } else if (this._status === 'complete') {
-      return this._finished - this._started;
-    }
-    return 0;
-  }
-
-  
-  /**
-   * The estimated time remaining in ms
-   * 
-   * Note: Returns 0 if the tracker's status is 'ready' or 'complete'
-   */
-  get estimated() {
-    if (this.value > 0 && this._status === 'running') {
-      return Math.round(this.target * (this.elapsed/this.value));
+  get elapsedTime(): number {
+    if (this._started) {
+      return (this._finished || Date.now()) - this._started;
     } else {
       return 0;
     }
   }
-}
 
-const st = new StatusTracker();
+  get estimatedTime(): number {
+    return Math.round((this.elapsedTime/Math.max(this.completed, 1)) * this.total);
+  }
+
+  get estimatedRemainingTime(): number {
+    return this.estimatedTime - this.elapsedTime;
+  }
+
+  get isRunning(): boolean {
+    return (this._started > 0 && this._finished === 0);
+  }
+
+  get isComplete(): boolean {
+    return (this.completed >= this.total);
+  }
+
+  start() {
+    this._started ||= Date.now();
+  }
+
+  stop() {
+    this._finished ||= Date.now();
+  }
+}
