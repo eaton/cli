@@ -6,12 +6,12 @@ export type TrackerOptions = {
    * The target total for progress calculations. This can be changed
    * while an operation is still running.
    */
-  total: number;
+  target: number;
 
   /**
    * The number of already-completed operations.
    */
-  completed: number;
+  value: number;
 
   /**
    * A status message with additional information about the current task.
@@ -37,15 +37,15 @@ export type TrackerOptions = {
 }
 
 const defaults: TrackerOptions = {
-  total: 0,
-  completed: 0,
+  target: 0,
+  value: 0,
   autostart: true,
   autostop: true,
 }
 
 export class StatusTracker {
-  protected _total = 0;
-  protected _completed = 0;
+  protected _target = 0;
+  protected _value = 0;
 
   protected _started = 0;
   protected _finished = 0;
@@ -55,8 +55,8 @@ export class StatusTracker {
   constructor(options: Partial<TrackerOptions> = {}) {
     const opt = { ...defaults, ...options };
 
-    this.completed = opt.completed;
-    this.total = opt.total;
+    this.target = opt.value;
+    this.total = opt.target;
 
     this.autostop = opt.autostop;
     if (opt.autostart) {
@@ -67,8 +67,8 @@ export class StatusTracker {
   reset() {
     this._finished = 0;
     this._started = 0;
-    this._completed = 0;
-    this._total = 0;
+    this._value = 0;
+    this._target = 0;
   }
 
   get [Symbol.toStringTag]() {
@@ -76,25 +76,34 @@ export class StatusTracker {
   }
 
   get total(): number {
-    return this._total;
+    return this._target;
   }
   set total(input: number) {
-    this._total = input;
+    this._target = input;
   }
 
-  get completed(): number {
-    return this._completed;
+  get value(): number {
+    return this._value;
   }
-  set completed(input: number) {
-    this._completed = input;
-    if (this.autostop && this.completed >= this.total) {
+  set value(input: number) {
+    this.start();
+    this._value = input;
+    if (this.total < input) this.total = input;
+  }
+
+  get target(): number {
+    return this._value;
+  }
+  set target(input: number) {
+    this._value = input;
+    if (this.autostop && this.target >= this.total) {
       this.stop();
     }
   }
 
-  get percentCompleted(): number {
+  get progress(): number {
     if (this.total <= 0) return 0;
-    return this.completed / this.total;
+    return this.target / this.total;
   }
 
   get elapsedTime(): number {
@@ -106,7 +115,7 @@ export class StatusTracker {
   }
 
   get estimatedTime(): number {
-    return Math.round((this.elapsedTime/Math.max(this.completed, 1)) * this.total);
+    return Math.round((this.elapsedTime/Math.max(this.target, 1)) * this.total);
   }
 
   get estimatedRemainingTime(): number {
@@ -118,7 +127,7 @@ export class StatusTracker {
   }
 
   get isComplete(): boolean {
-    return (this.completed >= this.total);
+    return (this.target >= this.total);
   }
 
   start() {

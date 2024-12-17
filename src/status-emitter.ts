@@ -7,7 +7,7 @@ export type StatusData<Custom extends Record<string, unknown> = {}> = Custom & {
 }
 
 /**
- * Standard events for progress functions
+ * Default events for progress functions
  */
 export type StatusEvents<Data extends StatusData = StatusData> = {
   start: Partial<Data> | undefined;
@@ -15,6 +15,11 @@ export type StatusEvents<Data extends StatusData = StatusData> = {
   complete: Data;
 }
 
+/**
+ * Convenience wrapper for the Emittery class; its `bindMethods` method
+ * dies on things that don't match the `Record` interface, even though
+ * it works fine. We… do some bad things here, but it's okay. For now.
+ */
 export class StatusEmitter<Events = StatusEvents> extends Emittery<Events> {
   // Nothing to see here, folks, patching around a type definition issue.
   override bindMethods(target: object, methodNames?: readonly string[]) {

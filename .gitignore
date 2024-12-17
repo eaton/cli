@@ -1,15 +1,6 @@
 **/.DS_Store
-*-debug.log
-*-error.log
-/.idea
-/.tsimp
-/.nyc_output
-/dist
-/lib
+.tap
+dist
 /package-lock.json
-/tmp
-/yarn.lock
 node_modules
 /*.env
-/input
-/output
