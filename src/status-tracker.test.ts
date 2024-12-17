@@ -1,5 +1,5 @@
 import t from 'tap';
-import { StatusTracker } from "../src/status-tracker.js";
+import { StatusTracker } from "./status-tracker.js";
 
 t.test('status and progress', t => {
   const st = new StatusTracker({ target: 100 });

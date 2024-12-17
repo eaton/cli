@@ -29,7 +29,7 @@ export function dotline(input: number[], options: Partial<Style> = {}) {
     .map(c => dots[c.join('')] ?? ' ')
     .slice(-1 * opt.width)
     .join('')
-    .padEnd(opt.width, ' ');
+    .padEnd(opt.width, opt.pad);
 
   const debug = opt.debug ? `(${opt.width}, ${opt.floor}, ${input.length})` : '';
   return (opt.formatter ? opt.formatter(output) : output) + debug;
